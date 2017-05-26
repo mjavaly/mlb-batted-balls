@@ -1,0 +1,48 @@
+<html>
+<head>
+<script src="http://d3js.org/d3.v3.js" charset="utf-8"></script>
+<title>Batted Ball Locations!</title>
+<style type="text/css">
+	body {
+		font-family: sans-serif;
+		font-size: 11px;
+		background-color: #ace456;
+	}
+
+	.axis path,
+	.axis line {
+		fill: none;
+		stroke: #000;
+		shape-rendering: crispEdges;
+	}
+
+	circle {
+		fill: #f00; 
+		stroke: #000;
+	}
+
+	.label {
+		text-anchor: middle;
+		font-size: 12px;
+		font-weight: bold;
+		cursor: pointer;
+	}
+
+	line {
+		stroke: white;
+		stroke-width: 4px;
+	}
+</style>
+</head>
+
+<body>
+	<div id="pointsSVG">
+
+	</div>
+	<br>
+	<select id="ballparks">
+		<option value=""></option>
+	</select>
+	<script type="text/javascript" src="mlb_plot.js"></script>
+</body>
+</html>
