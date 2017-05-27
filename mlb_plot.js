@@ -33,7 +33,7 @@ function updatePoints(stadium, batter, pitcher) {
 		// Next, we will create an SVG element to contain our visualization.
 		var pointPlot = d3.select('#pointsSVG').append('svg:svg')
 			.attr('width', w+600)
-			.attr('height', h+600)
+			.attr('height', h-200)
 
 		var x_hp = 125;
 		var y_hp = 43;

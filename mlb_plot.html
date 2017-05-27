@@ -33,16 +33,29 @@
 		stroke-width: 4px;
 	}
 </style>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script>
+$( function() {
+	var availableTags = [
+	  "AT&T Park",
+	  "Fenway Park",
+	  "Target Field"
+	];
+	$( "#ballparks" ).autocomplete({
+	  source: availableTags
+	});
+} );
+</script>
 </head>
 
 <body>
-	<div id="pointsSVG">
-
+	<div id="pointsSVG"></div>
+	<div class="ui-widget">
+	  <label for="ballparks">Ballparks: </label>
+	  <input id="ballparks">
 	</div>
-	<br>
-	<select id="ballparks">
-		<option value=""></option>
-	</select>
 	<script type="text/javascript" src="mlb_plot.js"></script>
 </body>
 </html>
