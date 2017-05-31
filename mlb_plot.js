@@ -60,6 +60,7 @@ d3.json("bbs-2016.json", function(jsonData) {
             data = jsonData[ballpark];
         }
         console.log(data.length);
+        
 		// This will define scales that convert values
 		// from our data domain into screen coordinates.
 //		xScale = d3.scale.linear()
@@ -131,27 +132,40 @@ d3.json("bbs-2016.json", function(jsonData) {
 		var circle = pointPlot.selectAll("circle")
 				.data(data);
 			circle.enter()
-				.append("svg:circle")
-				.filter(function(d) {
-					var p = (pitcher == "") ? true : d["pitcher_name"] == pitcher;
-					var b = (batter == "") ? true : d["batter_name"] == batter;
-					return p && b;
-				})
-				.attr("cx", function(d) { return xScale(d["x"]); })
+				.append("svg:circle");
+        
+            var filteredSelection = circle.filter(function(d) {
+                var p = (pitcher == "") ? true : d["pitcher_name"] == pitcher;
+                var b = (batter == "") ? true : d["batter_name"] == batter;
+                var j = d["type"] != "E" && !(d["x"] <= 1 && d["y"] <= 1)
+                return p && b && j;
+            });
+        
+            console.log(filteredSelection[0].length);
+            
+            filteredSelection.attr("cx", function(d) { return xScale(d["x"]); })
 				.attr("cy", function(d) { return yScale(250-d["y"]); })
 				.style("fill", function(d) {
 					if (d["type"] == "O") {
-						return "red";
+						return "#e41a1c";
 					}
 					else if (d["type"] == "H") {
-						return "blue";
+						return "#377eb8";
 					}
 					else {
 						return "black";
 					}
 				})
-				.attr("r", 2)
-				.on("mouseover", function(d) { console.log(d); })
+				.attr("r", function() {
+                    if (filteredSelection[0].length > 4000) { return "2"; }
+                    else { return "3"; }
+                })
+                .style("opacity", function() {
+                    if (filteredSelection[0].length > 100000) { return "0.3"; }
+                    else if (filteredSelection[0].length > 4000) { return "0.6"; }
+                    else { return "1"; }
+                })
+				.on("mouseover", function(d) { console.log(d); });
 	}
 	
 	$(function() {

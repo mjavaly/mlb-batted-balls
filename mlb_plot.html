@@ -1,59 +1,64 @@
 <html>
 <head>
-<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-<script src="http://d3js.org/d3.v3.js" charset="utf-8"></script>
-<script type="text/javascript" src="mlb_plot.js"></script>
-<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-<title>Batted Ball Locations!</title>
-<style type="text/css">
-	body {
-		font-family: sans-serif;
-		font-size: 11px;
-		background-color: #ace456;
-	}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="http://d3js.org/d3.v3.js" charset="utf-8"></script>
+    <script type="text/javascript" src="mlb_plot.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <title>Batted Ball Locations!</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            font-size: 11px;
+            background-color: #ace456;
+        }
 
-	.axis path,
-	.axis line {
-		fill: none;
-		stroke: #000;
-		shape-rendering: crispEdges;
-	}
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+        }
 
-	circle {
-		fill: #f00; 
-		stroke: #000;
-	}
+        circle {
+            fill: #f00; 
+            stroke: #000;
+        }
 
-	.label {
-		text-anchor: middle;
-		font-size: 12px;
-		font-weight: bold;
-		cursor: pointer;
-	}
+        .label {
+            text-anchor: middle;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
-	line {
-		stroke: white;
-		stroke-width: 4px;
-	}
-</style>
+        line {
+            stroke: white;
+            stroke-width: 4px;
+        }
+    </style>
 </head>
 <body>
-	<div class="ui-widget">
-	  <label for="ballparks">Home stadium: </label>
-	  <input id="ballparks">
-	</div>
-	<div class="ui-widget">
-	  <label for="batters">Batter: </label>
-	  <input id="batters">
-	</div>
-	<div class="ui-widget">
-	  <label for="pitchers">Pitchers: </label>
-	  <input id="pitchers">
-	</div>
-	<div>
-	  <button id="plotUpdate">Update!</button>
-	</div>
-	<svg id="pointsSVG" width="1650" height="900"></svg>
+    <div class="container">
+        <div class="ui-widget col-md-2">
+            <label for="ballparks">Home field: </label>
+            <input id="ballparks">
+        </div>
+        <div class="ui-widget col-md-2">
+            <label for="batters">Batter: </label>
+            <input id="batters">
+        </div>
+        <div class="ui-widget col-md-2">
+            <label for="pitchers">Pitchers: </label>
+            <input id="pitchers">
+        </div>
+        <div>
+            <br>
+            <button id="plotUpdate">Update!</button>
+        </div>
+        <svg id="pointsSVG" width="1650" height="900"></svg>
+    </div>
 </body>
 </html>
