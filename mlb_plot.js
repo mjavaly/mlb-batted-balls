@@ -5,67 +5,89 @@
 // Eric Alexander
 
 // First, we will create some constants to define non-data-related parts of the visualization
-w = 1050;           // Width of our visualization
-h = 1000;           // Height of our visualization
-margin = 120;        // Margin around visualization
-vals = ["x","y"]
-xVal = vals[0]
-yVal = vals[1]
-teamStadiums = {"Red Sox":"Fenway Park",
-				"Angels":"Angel Stadium",
-				"Tigers":"Comerica Park",
-				"Rangers":"Globe Life Park",
-				"White Sox":"Guaranteed Rate Field",
-				"Royals":"Kauffman Stadium",
-				"Astros":"Minute Maid Park",
-				"Athletics":"Oakland Alameda Coliseum",
-				"Orioles":"Oriole Park",
-				"Indians":"Progressive Field",
-				"Blue Jays":"Rogers Centre",
-				"Mariners":"Safeco Field",
-				"Twins":"Target Field",
-				"Rays":"Tropicana Field",
-				"Yankees":"Yankee Stadium",
-				"Giants":"AT&T Park",
-				"Cardinals":"Busch Stadium",
-				"Diamondbacks":"Chase Field",
-				"Mets":"Citi Field",
-				"Phillies":"Citizens Bank Park",
-				"Rockies":"Coors Field",
-				"Dodgers":"Dodger Stadium",
-				"Reds":"Great American Ball Park",
-				"Marlins":"Marlins Park",
-				"Brewers":"Miller Park",
-				"Nationals":"Nationals Park",
-				"Padres":"Petco Park",
-				"Pirates":"PNC Park",
-				"Braves":"Turner Field",
-				"Cubs":"Wrigley Field"}
+var w = 1050;           // Width of our visualization
+var h = 1000;           // Height of our visualization
+var margin = 120;        // Margin around visualization
+var xVal = "x";
+var yVal = "y";
+var teamParks = {"Red Sox": "Fenway Park",
+				"Angels": "Angel Stadium",
+				"Tigers": "Comerica Park",
+				"Rangers": "Globe Life Park",
+				"White Sox": "Guaranteed Rate Field",
+				"Royals": "Kauffman Stadium",
+				"Astros": "Minute Maid Park",
+				"Athletics": "Oakland Alameda Coliseum",
+				"Orioles": "Oriole Park",
+				"Indians": "Progressive Field",
+				"Blue Jays": "Rogers Centre",
+				"Mariners": "Safeco Field",
+				"Twins": "Target Field",
+				"Rays": "Tropicana Field",
+				"Yankees": "Yankee Stadium",
+				"Giants": "AT&T Park",
+				"Cardinals": "Busch Stadium",
+				"Diamondbacks": "Chase Field",
+				"Mets": "Citi Field",
+				"Phillies": "Citizens Bank Park",
+				"Rockies": "Coors Field",
+				"Dodgers": "Dodger Stadium",
+				"Reds": "Great American Ball Park",
+				"Marlins": "Marlins Park",
+				"Brewers": "Miller Park",
+				"Nationals": "Nationals Park",
+				"Padres": "Petco Park",
+				"Pirates": "PNC Park",
+				"Braves": "Turner Field",
+				"Cubs": "Wrigley Field"};
 
-curTeam = "Twins"
-curBatter = "Brian Dozier"
-curPitcher = "*"
+var curTeam = "Twins";
+var curBatter = "Brian Dozier";
+var curPitcher = "";
 
 d3.json("bbs-2016.json", function(jsonData) {
-
-	function updatePoints(stadium, batter, pitcher) {
-
-		data = jsonData[stadium];
+    
+    pointPlot = d3.select("#pointsSVG");
+    
+	function updatePoints(ballpark, batter, pitcher) {
+        var data = [];
+        if (ballpark == "") {
+            for (park in jsonData) {
+                data = data.concat(jsonData[park]);
+            }
+        }
+        else {
+            data = jsonData[ballpark];
+        }
+        console.log(data.length);
 		// This will define scales that convert values
 		// from our data domain into screen coordinates.
-		xScale = d3.scale.linear()
-					.domain([d3.min(data, function(d) { return parseFloat(d[xVal]); })-1,
-							 d3.max(data, function(d) { return parseFloat(d[xVal]); })+1])
+//		xScale = d3.scale.linear()
+//					.domain([d3.min(data, function(d) { return parseFloat(d[xVal]); })-1,
+//							 d3.max(data, function(d) { return parseFloat(d[xVal]); })+1])
+//					.range([margin, w - margin]);
+//		yScale = d3.scale.linear()
+//					.domain([d3.min(data, function(d) { return parseFloat(d[yVal]); })-1,
+//							 d3.max(data, function(d) { return parseFloat(d[yVal]); })+1])
+//					.range([h - margin, margin]);
+        
+        var xMin = d3.min(data, function(d) { return parseFloat(d[xVal]); })-1;
+        var yMin = d3.min(data, function(d) { return parseFloat(d[yVal]); })-1;
+        var xMax = d3.max(data, function(d) { return parseFloat(d[xVal]); })+1;
+        var yMax = d3.max(data, function(d) { return parseFloat(d[yVal]); })+1;
+        console.log("x min: " + xMin);
+        console.log("x max: " + xMax);
+        console.log("y min: " + yMin);
+        console.log("y max: " + yMax);
+        
+        xScale = d3.scale.linear()
+					.domain([0,250])
 					.range([margin, w - margin]);
 		yScale = d3.scale.linear()
-					.domain([d3.min(data, function(d) { return parseFloat(d[yVal]); })-1,
-							 d3.max(data, function(d) { return parseFloat(d[yVal]); })+1])
-					.range([h - margin, margin]); // Notice this is backwards!
-
-		// Next, we will create an SVG element to contain our visualization.
-		var pointPlot = d3.select("#pointsSVG").append("svg:svg")
-			.attr("width", w+600)
-			.attr("height", h-200)
+					.domain([0,235])
+					.range([h - margin, margin]);
+        
+        pointPlot.selectAll("*").remove();
 
 		var x_hp = 125;
 		var y_hp = 43;
@@ -111,8 +133,8 @@ d3.json("bbs-2016.json", function(jsonData) {
 			circle.enter()
 				.append("svg:circle")
 				.filter(function(d) {
-					var p = (pitcher == "*") ? true : d["pitcher_name"] == pitcher;
-					var b = (batter == "*") ? true : d["batter_name"] == batter;
+					var p = (pitcher == "") ? true : d["pitcher_name"] == pitcher;
+					var b = (batter == "") ? true : d["batter_name"] == batter;
 					return p && b;
 				})
 				.attr("cx", function(d) { return xScale(d["x"]); })
@@ -128,11 +150,12 @@ d3.json("bbs-2016.json", function(jsonData) {
 						return "black";
 					}
 				})
-				.attr("r", 3)
+				.attr("r", 2)
 				.on("mouseover", function(d) { console.log(d); })
 	}
 	
 	$(function() {
+        // use Sets for batters and pitchers to prevent duplicates
 		var batters = new Set();
 		var pitchers = new Set();
 		for (park in jsonData) {
@@ -142,8 +165,20 @@ d3.json("bbs-2016.json", function(jsonData) {
 				pitchers.add(hit["pitcher_name"]);
 			}
 		}
+        // jquery autocomplete only works with arrays for some reason
 		let batterList = Array.from(batters);
 		let pitcherList = Array.from(pitchers);
+        // get list of stadiums and their home teams
+        var bps = [];
+        for (team in teamParks) {
+            bps.push(team);
+    //		bps.push(team + " (" + teamParks[team] + ")");
+        }
+        $("#ballparks").autocomplete({ source: bps })
+					.on("autocompletechange", function() {
+						curTeam = this.value;
+						console.log(curTeam);
+					});
 		$("#batters").autocomplete({ source: batterList })
 					.on("autocompletechange", function() {
 						curBatter = this.value;
@@ -154,13 +189,17 @@ d3.json("bbs-2016.json", function(jsonData) {
 						curPitcher = this.value;
 						console.log(curPitcher);
 					});
-		d3.select('#dataBtn').on("click", function() {
+		d3.select("#plotUpdate").on("click", function() {
 			console.log("updating...");
 			updatePoints(curTeam, curBatter, curPitcher);
 		});
 	});
 
-	updatePoints(curTeam, curBatter, curPitcher);
+    $("#ballparks").val("Twins");
+    $("#batters").val("Brian Dozier");
+    $("#pitchers").val("");
+    updatePoints(curTeam, curBatter, curPitcher);
+
 });
 
 // var park = d3.select("#ballparks");
@@ -171,12 +210,4 @@ d3.json("bbs-2016.json", function(jsonData) {
 // 	console.log(newData);
 // 	// updatePoints(newData);
 // });
-
-$(function() {
-	var bps = [];
-	for (team in teamStadiums) {
-		bps.push(team + " (" + teamStadiums[team] + ")");
-	}
-	$("#ballparks").autocomplete({ source: bps });
-});
 
