@@ -41,6 +41,11 @@ teamStadiums = {"Red Sox":"Fenway Park",
 				"Pirates":"PNC Park",
 				"Braves":"Turner Field",
 				"Cubs":"Wrigley Field"}
+
+curTeam = "Twins"
+curBatter = "Brian Dozier"
+curPitcher = "*"
+
 d3.json("bbs-2016.json", function(jsonData) {
 
 	function updatePoints(stadium, batter, pitcher) {
@@ -139,21 +144,33 @@ d3.json("bbs-2016.json", function(jsonData) {
 		}
 		let batterList = Array.from(batters);
 		let pitcherList = Array.from(pitchers);
-		$("#batters").autocomplete({ source: batterList });
-		$("#pitchers").autocomplete({ source: pitcherList });
+		$("#batters").autocomplete({ source: batterList })
+					.on("autocompletechange", function() {
+						curBatter = this.value;
+						console.log(curBatter);
+					});
+		$("#pitchers").autocomplete({ source: pitcherList })
+					.on("autocompletechange", function() {
+						curPitcher = this.value;
+						console.log(curPitcher);
+					});
+		d3.select('#dataBtn').on("click", function() {
+			console.log("updating...");
+			updatePoints(curTeam, curBatter, curPitcher);
+		});
 	});
 
-	updatePoints("Twins","Brian Dozier", "*");
+	updatePoints(curTeam, curBatter, curPitcher);
 });
 
-var park = d3.select("#ballparks");
-console.log(park.data);
+// var park = d3.select("#ballparks");
+// console.log(park.data);
 
-park.on("input", function() {
-	var newData = d3.select(this);
-	console.log(newData);
-	// updatePoints(newData);
-});
+// park.on("input", function() {
+// 	var newData = d3.select(this);
+// 	console.log(newData);
+// 	// updatePoints(newData);
+// });
 
 $(function() {
 	var bps = [];
