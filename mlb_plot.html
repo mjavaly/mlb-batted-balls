@@ -23,8 +23,7 @@
         }
 
         circle {
-            fill: #f00; 
-            stroke: #000;
+            fill: #f00;
         }
 
         .label {
@@ -54,6 +53,16 @@
             <label for="pitchers">Pitchers: </label>
             <input id="pitchers">
         </div>
+		<div class="col-md-2">
+			<label for="results">Results: </label><br>
+			<select name="results" multiple>
+				<option value="out">Out</option>
+				<option value="single">Single</option>
+				<option value="double">Double</option>
+				<option value="triple">Triple</option>
+				<option value="homerun">Homerun</option>
+			</select>
+		</div>
         <div>
             <br>
             <button id="plotUpdate" class="btn btn-default btn-sm">Update!</button>
