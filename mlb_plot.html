@@ -10,29 +10,9 @@
     <title>Batted Ball Locations!</title>
     <style type="text/css">
         body {
-            font-family: sans-serif;
-            font-size: 11px;
             background-color: #ace456;
         }
-
-        .axis path,
-        .axis line {
-            fill: none;
-            stroke: #000;
-            shape-rendering: crispEdges;
-        }
-
-        circle {
-            fill: #f00;
-        }
-
-        .label {
-            text-anchor: middle;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
+		
         line {
             stroke: white;
             stroke-width: 4px;
@@ -54,13 +34,13 @@
             <input id="pitchers">
         </div>
 		<div class="col-md-2">
-			<label for="results">Results: </label><br>
-			<select name="results" multiple>
+			<label for="hit-results">Results: </label><br>
+			<select id="hit-results" name="hit-results" multiple>
 				<option value="out">Out</option>
 				<option value="single">Single</option>
 				<option value="double">Double</option>
 				<option value="triple">Triple</option>
-				<option value="homerun">Homerun</option>
+				<option value="home run">Homerun</option>
 			</select>
 		</div>
         <div>

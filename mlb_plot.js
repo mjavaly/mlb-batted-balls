@@ -50,6 +50,8 @@ d3.json("bbs-2016.json", function(jsonData) {
     pointPlot = d3.select("#pointsSVG");
     
 	function updatePoints(ballpark, batter, pitcher) {
+		hitResults = $("#hit-results").val();
+		console.log(hitResults);
         var data = [];
         if (ballpark == "") {
             for (park in jsonData) {
@@ -59,7 +61,6 @@ d3.json("bbs-2016.json", function(jsonData) {
         else {
             data = jsonData[ballpark];
         }
-        console.log(data.length);
         
 		// This will define scales that convert values
 		// from our data domain into screen coordinates.
@@ -76,10 +77,6 @@ d3.json("bbs-2016.json", function(jsonData) {
         var yMin = d3.min(data, function(d) { return parseFloat(d[yVal]); })-1;
         var xMax = d3.max(data, function(d) { return parseFloat(d[xVal]); })+1;
         var yMax = d3.max(data, function(d) { return parseFloat(d[yVal]); })+1;
-        console.log("x min: " + xMin);
-        console.log("x max: " + xMax);
-        console.log("y min: " + yMin);
-        console.log("y max: " + yMax);
         
         xScale = d3.scale.linear()
 					.domain([0,250])
@@ -137,8 +134,9 @@ d3.json("bbs-2016.json", function(jsonData) {
             var filteredSelection = circle.filter(function(d) {
                 var p = (pitcher == "") ? true : d["pitcher_name"] == pitcher;
                 var b = (batter == "") ? true : d["batter_name"] == batter;
-                var j = d["type"] != "E" && !(d["x"] <= 1 && d["y"] <= 1)
-                return p && b && j;
+                var j = d["type"] != "E" && !(d["x"] <= 1 && d["y"] <= 1);
+				var correctHit = hitResults.includes(d["des"].toLowerCase());
+                return correctHit && p && b && j;
             });
         
             console.log(filteredSelection[0].length);
@@ -149,8 +147,17 @@ d3.json("bbs-2016.json", function(jsonData) {
 					if (d["type"] == "O") {
 						return "#e41a1c";
 					}
-					else if (d["type"] == "H") {
+					else if (d["des"] == "Single") {
 						return "#377eb8";
+					}
+					else if (d["des"] == "Double") {
+						return "#33a02c";
+					}
+					else if (d["des"] == "Triple") {
+						return "#ffff99";
+					}
+					else if (d["des"] == "Home Run") {
+						return "#ff7f00";
 					}
 					else {
 						return "black";
@@ -212,6 +219,7 @@ d3.json("bbs-2016.json", function(jsonData) {
     $("#ballparks").val("Twins");
     $("#batters").val("Brian Dozier");
     $("#pitchers").val("");
+	$("#hit-results").val(["out", "single", "double", "triple", "home run"]);
     updatePoints(curTeam, curBatter, curPitcher);
 
 });
