@@ -1,58 +1,78 @@
 <html>
 <head>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <script src="http://d3js.org/d3.v3.js" charset="utf-8"></script>
-    <script type="text/javascript" src="mlb_plot.js"></script>
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-    <title>Batted Ball Locations!</title>
-    <style type="text/css">
-        body {
-            background-color: #ace456;
-        }
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	<script src="http://d3js.org/d3.v3.js" charset="utf-8"></script>
+	<script type="text/javascript" src="mlb_plot.js"></script>
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+	<title>2016 MLB Batted Ball Locations!</title>
+	<style type="text/css">
+		body {
+			background-color: #ace456;
+		}
 		
-        line {
-            stroke: white;
-            stroke-width: 4px;
-        }
+		line {
+			stroke: white;
+			stroke-width: 4px;
+		}
 
-        label {
-        	margin-top:10px;
-        }
+		label {
+			margin-top: 15px;
+			margin-bottom: 10px;
+			margin-right: 4.7px;
+		}
 
-        #svg-container {
-        	position: relative;
-        	top:-50px;
-        	left:-50px;
-        }
+		input {
+			margin-top: 10px;
+		}
 
-        #hit-results {
-        	height:87px;
-        }
+		button {
+			margin-top: 10px;
+		}
 
-        #filters {
-        	margin-top:15px;
-        }
+		#svg-container {
+			position: relative;
+			top: -50px;
+		}
 
-    </style>
+		/* 87px happens to perfectly fit the five items we have */
+		#hit-results {
+			height: 87px;
+		}
+
+		#filters {
+			margin-top: 15px;
+		}
+
+	</style>
 </head>
 <body>
-    <div class="container-fluid">
-	    <div id="filters" class="col-md-2">
-	        <div class="ui-widget">
-	            <label for="ballparks">Home team: </label>
-	            <input id="ballparks"><br>
-	        </div>
-	        <div class="ui-widget">
-	            <label for="batters">Batter: </label><br>
-	            <input id="batters"><br>
-	        </div>
-	        <div class="ui-widget">
-	            <label for="pitchers">Pitchers: </label><br>
-	            <input id="pitchers"><br>
-	        </div>
+	<div class="container-fluid">
+		<div id="filters" class="col-md-2">
+			<div class="ui-widget">
+				<label for="ballparks">Home team: </label>
+				<input id="ballparks">
+			</div>
+			<div class="ui-widget">
+				<label for="batters">Batter(s): </label>
+				<input id="batters">
+			</div>
+			<div class="checkbox">
+				<label><input id="rightybatters" type="checkbox" name="batter">Righties</label>
+				<label><input id="leftybatters" type="checkbox" name="batter">Lefties</label>
+				<label><input id="allbatters" type="checkbox" name="batter">All</label>
+			</div>
+			<div class="ui-widget">
+				<label for="pitchers">Pitcher(s): </label>
+				<input id="pitchers">
+			</div>
+			<div class="checkbox">
+				<label><input id="rightypitchers" type="checkbox" name="pitcher">Righties</label>
+				<label><input id="leftypitchers" type="checkbox" name="pitcher">Lefties</label>
+				<label><input id="allpitchers" type="checkbox" name="pitcher">All</label>
+			</div>
 			<div class="">
 				<label for="hit-results">Results: </label><br>
 				<select id="hit-results" name="hit-results" multiple>
@@ -63,14 +83,13 @@
 					<option value="home run">Homerun</option>
 				</select><br>
 			</div>
-	        <div>
-	            <br>
-	            <button id="plotUpdate" class="btn btn-default btn-sm">Update!</button>
-	        </div>
-	    </div>
-	 	<div id="svg-container" class="col-md-10">
-        	<svg id="pointsSVG" width="1000" height="800"></svg>
-        </div>
-    </div>
+			<div>
+				<button id="plotUpdate" class="btn btn-default btn-sm">Update!</button>
+			</div>
+		</div>
+		<div id="svg-container" class="col-md-10">
+			<svg id="pointsSVG" width="1000" height="800"></svg>
+		</div>
+	</div>
 </body>
 </html>
