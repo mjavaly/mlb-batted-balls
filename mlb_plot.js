@@ -41,16 +41,15 @@ var teamParks = {"Red Sox": "Fenway Park",
 				"Braves": "Turner Field",
 				"Cubs": "Wrigley Field"};
 
-var curTeam = "Twins";
-var curBatter = "Brian Dozier";
-var curPitcher = "";
-
 d3.json("bbs-2016.json", function(jsonData) {
     
     pointPlot = d3.select("#pointsSVG");
     
-	function updatePoints(ballpark, batter, pitcher) {
-		hitResults = $("#hit-results").val();
+	function updatePoints() {
+		var ballpark = $("#ballparks").val();
+		var batter = $("#batters").val();
+		var pitcher = $("#pitchers").val();
+		var hitResults = $("#hit-results").val();
 		console.log(hitResults);
         var data = [];
         if (ballpark == "") {
@@ -61,17 +60,6 @@ d3.json("bbs-2016.json", function(jsonData) {
         else {
             data = jsonData[ballpark];
         }
-        
-		// This will define scales that convert values
-		// from our data domain into screen coordinates.
-//		xScale = d3.scale.linear()
-//					.domain([d3.min(data, function(d) { return parseFloat(d[xVal]); })-1,
-//							 d3.max(data, function(d) { return parseFloat(d[xVal]); })+1])
-//					.range([margin, w - margin]);
-//		yScale = d3.scale.linear()
-//					.domain([d3.min(data, function(d) { return parseFloat(d[yVal]); })-1,
-//							 d3.max(data, function(d) { return parseFloat(d[yVal]); })+1])
-//					.range([h - margin, margin]);
         
         var xMin = d3.min(data, function(d) { return parseFloat(d[xVal]); })-1;
         var yMin = d3.min(data, function(d) { return parseFloat(d[yVal]); })-1;
@@ -98,33 +86,25 @@ d3.json("bbs-2016.json", function(jsonData) {
 			.attr("x1", function(d) { return xScale(x_hp); })
 			.attr("y1", function(d) { return yScale(y_hp); })
 			.attr("x2", function(d) { return xScale(x_hp - f_angl * f_len); })
-			.attr("y2", function(d) { return yScale(y_hp + f_angl * f_len); })
-			.attr("stroke-width", 2)
-			.attr("stroke", "black");
+			.attr("y2", function(d) { return yScale(y_hp + f_angl * f_len); });
 
 		var rightFoul = pointPlot.append("line")
 			.attr("x1", function(d) { return xScale(x_hp); })
 			.attr("y1", function(d) { return yScale(y_hp); })
 			.attr("x2", function(d) { return xScale(x_hp + f_angl * f_len); })
-			.attr("y2", function(d) { return yScale(y_hp + f_angl * f_len); })
-			.attr("stroke-width", 2)
-			.attr("stroke", "black");
+			.attr("y2", function(d) { return yScale(y_hp + f_angl * f_len); });
 
 		var firstToSecond = pointPlot.append("line")
 			.attr("x1", function(d) { return xScale(x_hp); })
 			.attr("y1", function(d) { return yScale(y_hp + Math.sqrt(2) * b_len); })
 			.attr("x2", function(d) { return xScale(x_hp - f_angl * b_len); })
-			.attr("y2", function(d) { return yScale(y_hp + f_angl * b_len); })
-			.attr("stroke-width", 2)
-			.attr("stroke", "black");
+			.attr("y2", function(d) { return yScale(y_hp + f_angl * b_len); });
 
 		var secondToThird = pointPlot.append("line")
 			.attr("x1", function(d) { return xScale(x_hp + f_angl * b_len); })
 			.attr("y1", function(d) { return yScale(y_hp + f_angl * b_len); })
 			.attr("x2", function(d) { return xScale(x_hp); })
-			.attr("y2", function(d) { return yScale(y_hp + Math.sqrt(2) * b_len); })
-			.attr("stroke-width", 2)
-			.attr("stroke", "black");
+			.attr("y2", function(d) { return yScale(y_hp + Math.sqrt(2) * b_len); });
 
 		var circle = pointPlot.selectAll("circle")
 				.data(data);
@@ -135,7 +115,7 @@ d3.json("bbs-2016.json", function(jsonData) {
                 var p = (pitcher == "") ? true : d["pitcher_name"] == pitcher;
                 var b = (batter == "") ? true : d["batter_name"] == batter;
                 var j = d["type"] != "E" && !(d["x"] <= 1 && d["y"] <= 1);
-				var correctHit = hitResults.includes(d["des"].toLowerCase());
+				var correctHit = hitResults.includes(d["des"].toLowerCase()) || (hitResults.includes("out") && d["type"] == "O");
                 return correctHit && p && b && j;
             });
         
@@ -147,14 +127,14 @@ d3.json("bbs-2016.json", function(jsonData) {
 					if (d["type"] == "O") {
 						return "#e41a1c";
 					}
-					else if (d["des"] == "Single") {
+					if (d["des"] == "Single") {
 						return "#377eb8";
 					}
 					else if (d["des"] == "Double") {
-						return "#33a02c";
+						return "#984ea3";
 					}
 					else if (d["des"] == "Triple") {
-						return "#ffff99";
+						return "#252525";
 					}
 					else if (d["des"] == "Home Run") {
 						return "#ff7f00";
@@ -163,17 +143,71 @@ d3.json("bbs-2016.json", function(jsonData) {
 						return "black";
 					}
 				})
-				.attr("r", function() {
-                    if (filteredSelection[0].length > 4000) { return "2"; }
-                    else { return "3"; }
-                })
+				.attr("r", getRadius(filteredSelection[0]))
                 .style("opacity", function() {
                     if (filteredSelection[0].length > 100000) { return "0.3"; }
                     else if (filteredSelection[0].length > 4000) { return "0.6"; }
                     else { return "1"; }
                 })
-				.on("mouseover", function(d) { console.log(d); });
+				.on("mouseover", function(d) {
+					console.log(d);
+					d3.select(this).style("stroke", "white")
+									.style("stroke-width", "2px")
+									.attr("r", "6");
+				})
+				.on("mouseout", function(d) {
+					d3.select(this).style("stroke", "none")
+									.attr("r", getRadius(filteredSelection[0]));
+				})
+				.append("svg:title")
+                .text(function(d) {
+                    return d["batter_name"] + getVerb(d["des"]) + getPreposition(d["type"]) + d["pitcher_name"] + ".";
+                });
 	}
+
+	function getRadius(numPoints) {
+        if (numPoints.length > 4000) { return "2"; }
+        else { return "3"; }
+    }
+
+    function getVerb(description) {
+    	switch (description) {
+    		case "Home Run":
+    			return " homered ";
+    			break;
+    		case "Groundout":
+    			return " grounded out ";
+    			break;
+    		case "Bunt Groundout":
+    			return " bunted out ";
+    			break;
+
+    		case "Flyout":
+    			return " flied out ";
+    			break;
+
+    		case "Pop Out":
+    			return " popped out ";
+    			break;
+
+    		case "Lineout":
+    			return " lined out ";
+    			break
+
+    		default:
+    			return " " + description.toLowerCase() + "d ";
+    			break;
+    	}
+    }
+
+    function getPreposition(type) {
+    	if (type == "O") {
+    		return "against ";
+    	}
+    	else {
+    		return "off ";
+    	}
+    }
 	
 	$(function() {
         // use Sets for batters and pitchers to prevent duplicates
@@ -186,15 +220,17 @@ d3.json("bbs-2016.json", function(jsonData) {
 				pitchers.add(hit["pitcher_name"]);
 			}
 		}
+
         // jquery autocomplete only works with arrays for some reason
 		let batterList = Array.from(batters);
 		let pitcherList = Array.from(pitchers);
+
         // get list of stadiums and their home teams
         var bps = [];
         for (team in teamParks) {
             bps.push(team);
-    //		bps.push(team + " (" + teamParks[team] + ")");
         }
+
         $("#ballparks").autocomplete({ source: bps })
 					.on("autocompletechange", function() {
 						curTeam = this.value;
@@ -211,25 +247,14 @@ d3.json("bbs-2016.json", function(jsonData) {
 						console.log(curPitcher);
 					});
 		d3.select("#plotUpdate").on("click", function() {
-			console.log("updating...");
-			updatePoints(curTeam, curBatter, curPitcher);
+			updatePoints();
 		});
 	});
 
-    $("#ballparks").val("Twins");
-    $("#batters").val("Brian Dozier");
+    $("#ballparks").val("");
+    $("#batters").val("Mike Trout");
     $("#pitchers").val("");
 	$("#hit-results").val(["out", "single", "double", "triple", "home run"]);
-    updatePoints(curTeam, curBatter, curPitcher);
-
+    updatePoints();
 });
-
-// var park = d3.select("#ballparks");
-// console.log(park.data);
-
-// park.on("input", function() {
-// 	var newData = d3.select(this);
-// 	console.log(newData);
-// 	// updatePoints(newData);
-// });
 

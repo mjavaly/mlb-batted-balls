@@ -17,37 +17,60 @@
             stroke: white;
             stroke-width: 4px;
         }
+
+        label {
+        	margin-top:10px;
+        }
+
+        #svg-container {
+        	position: relative;
+        	top:-50px;
+        	left:-50px;
+        }
+
+        #hit-results {
+        	height:87px;
+        }
+
+        #filters {
+        	margin-top:15px;
+        }
+
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="ui-widget col-md-2">
-            <label for="ballparks">Home field: </label>
-            <input id="ballparks">
+    <div class="container-fluid">
+	    <div id="filters" class="col-md-2">
+	        <div class="ui-widget">
+	            <label for="ballparks">Home team: </label>
+	            <input id="ballparks"><br>
+	        </div>
+	        <div class="ui-widget">
+	            <label for="batters">Batter: </label><br>
+	            <input id="batters"><br>
+	        </div>
+	        <div class="ui-widget">
+	            <label for="pitchers">Pitchers: </label><br>
+	            <input id="pitchers"><br>
+	        </div>
+			<div class="">
+				<label for="hit-results">Results: </label><br>
+				<select id="hit-results" name="hit-results" multiple>
+					<option value="out">Out</option>
+					<option value="single">Single</option>
+					<option value="double">Double</option>
+					<option value="triple">Triple</option>
+					<option value="home run">Homerun</option>
+				</select><br>
+			</div>
+	        <div>
+	            <br>
+	            <button id="plotUpdate" class="btn btn-default btn-sm">Update!</button>
+	        </div>
+	    </div>
+	 	<div id="svg-container" class="col-md-10">
+        	<svg id="pointsSVG" width="1000" height="800"></svg>
         </div>
-        <div class="ui-widget col-md-2">
-            <label for="batters">Batter: </label>
-            <input id="batters">
-        </div>
-        <div class="ui-widget col-md-2">
-            <label for="pitchers">Pitchers: </label>
-            <input id="pitchers">
-        </div>
-		<div class="col-md-2">
-			<label for="hit-results">Results: </label><br>
-			<select id="hit-results" name="hit-results" multiple>
-				<option value="out">Out</option>
-				<option value="single">Single</option>
-				<option value="double">Double</option>
-				<option value="triple">Triple</option>
-				<option value="home run">Homerun</option>
-			</select>
-		</div>
-        <div>
-            <br>
-            <button id="plotUpdate" class="btn btn-default btn-sm">Update!</button>
-        </div>
-        <svg id="pointsSVG" width="1650" height="900"></svg>
     </div>
 </body>
 </html>
