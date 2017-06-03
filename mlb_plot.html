@@ -12,45 +12,41 @@
 		body {
 			background-color: #ace456;
 		}
-		
 		line {
 			stroke: white;
 			stroke-width: 4px;
 		}
-
 		label {
 			margin-top: 15px;
 			margin-bottom: 10px;
 			margin-right: 4.7px;
 		}
-
 		input {
 			margin-top: 10px;
 		}
-
 		button {
 			margin-top: 10px;
 		}
-
 		#svg-container {
 			position: relative;
 			top: -50px;
 		}
-
 		/* 87px happens to perfectly fit the five items we have */
 		#hit-results {
 			height: 87px;
 		}
-
-		#filters {
-			margin-top: 15px;
-		}
-
+        .sidebar {
+            margin-top: 15px;
+            background-color: #d9d9d9;
+            padding: 10px;
+            border: 1px solid #bdbdbd;
+            border-radius: 10px;
+        }
 	</style>
 </head>
 <body>
 	<div class="container-fluid">
-		<div id="filters" class="col-md-2">
+		<div id="filters" class="col-md-2 sidebar">
 			<div class="ui-widget">
 				<label for="ballparks">Home team: </label>
 				<input id="ballparks">
@@ -87,13 +83,16 @@
 				</select><br>
 			</div>
 			<div>
-				<button id="plotUpdate" class="btn btn-default btn-sm">Update!</button>
+                <div class="row">
+                    <div class="col-md-4"></div>
+				    <button id="plotUpdate" class="btn btn-default btn-sm col-md-4">Update!</button>
+                </div>
 			</div>
 		</div>
 		<div id="svg-container" class="col-md-8">
 			<svg id="pointsSVG" width="1000" height="800"></svg>
 		</div>
-		<div class="col-md-2">
+		<div id="color-key" class="col-md-2 sidebar">
 			<ul>
 				<li style="color:#ff7f00;"><label>Home Runs</label></li>
 				<li style="color:#252525;"><label>Triples</label></li>

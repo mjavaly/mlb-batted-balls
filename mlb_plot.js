@@ -165,7 +165,7 @@ d3.json("bbs-2016.json", function(jsonData) {
 					return "#e41a1c";
 				}
 				if (d["des"] == "Single") {
-					return "#377eb8";
+					return "#1f78b4";
 				}
 				else if (d["des"] == "Double") {
 					return "#984ea3";
@@ -213,19 +213,15 @@ d3.json("bbs-2016.json", function(jsonData) {
 			case "Bunt Groundout":
 				return "bunted out ";
 				break;
-
 			case "Flyout":
 				return "flied out ";
 				break;
-
 			case "Pop Out":
 				return "popped out ";
 				break;
-
 			case "Lineout":
 				return "lined out ";
 				break
-
 			default:
 				// a rare case of the English language making it easy to format strings
 				return description.toLowerCase() + "d ";
