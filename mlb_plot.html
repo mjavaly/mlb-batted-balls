@@ -9,39 +9,54 @@
 	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 	<title>2016 MLB Batted Ball Locations!</title>
 	<style type="text/css">
+
 		body {
 			background-color: #ace456;
 		}
+
 		line {
 			stroke: white;
 			stroke-width: 4px;
 		}
+
 		label {
-			margin-top: 15px;
-			margin-bottom: 10px;
-			margin-right: 4.7px;
+			padding-top: 10px;
 		}
+
 		input {
 			margin-top: 10px;
 		}
+
 		button {
 			margin-top: 10px;
 		}
+
+		.checkbox label {
+			padding-right: 10px;
+		}
+
 		#svg-container {
 			position: relative;
 			top: -50px;
 		}
+
 		/* 87px happens to perfectly fit the five items we have */
 		#hit-results {
 			height: 87px;
 		}
-        .sidebar {
-            margin-top: 15px;
-            background-color: #d9d9d9;
-            padding: 10px;
-            border: 1px solid #bdbdbd;
-            border-radius: 10px;
-        }
+
+		#color-key {
+			font-size: 20px;
+		}
+
+		.sidebar {
+			margin-top: 15px;
+			background-color: #d9d9d9;
+			padding: 10px;
+			border: 1px solid #bdbdbd;
+			border-radius: 10px;
+		}
+
 	</style>
 </head>
 <body>
@@ -80,23 +95,26 @@
 					<option value="double">Double</option>
 					<option value="triple">Triple</option>
 					<option value="home run">Homerun</option>
-				</select><br>
+				</select>
+			</div>
+			<div class="checkbox">
+				<label><input id="binary_color" type="checkbox" name="hit-results">Only Display Hits &amp; Outs</label>
 			</div>
 			<div>
-                <div class="row">
-                    <div class="col-md-4"></div>
-				    <button id="plotUpdate" class="btn btn-default btn-sm col-md-4">Update!</button>
-                </div>
+				<div class="row">
+					<div class="col-md-4"></div>
+					<button id="plotUpdate" class="btn btn-default btn-sm col-md-4">Update!</button>
+				</div>
 			</div>
 		</div>
 		<div id="svg-container" class="col-md-8">
 			<svg id="pointsSVG" width="1000" height="800"></svg>
 		</div>
 		<div id="color-key" class="col-md-2 sidebar">
-			<ul>
+			<ul id="color-list">
 				<li style="color:#ff7f00;"><label>Home Runs</label></li>
 				<li style="color:#252525;"><label>Triples</label></li>
-				<li style="color:#984ea3;"><label>Doubles</label></li>
+				<li style="color:#377e35;"><label>Doubles</label></li>
 				<li style="color:#377eb8;"><label>Singles</label></li>
 				<li style="color:#e41a1c;"><label>Outs</label></li>
 			</ul>

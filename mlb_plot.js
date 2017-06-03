@@ -1,43 +1,14 @@
-var w = 1050;           
-var h = 1000;           
-var margin = 120;       
-var xVal = "x";
-var yVal = "y";
-var teamParks = {"Red Sox": "Fenway Park",
-				"Angels": "Angel Stadium",
-				"Tigers": "Comerica Park",
-				"Rangers": "Globe Life Park",
-				"White Sox": "Guaranteed Rate Field",
-				"Royals": "Kauffman Stadium",
-				"Astros": "Minute Maid Park",
-				"Athletics": "Oakland Alameda Coliseum",
-				"Orioles": "Oriole Park",
-				"Indians": "Progressive Field",
-				"Blue Jays": "Rogers Centre",
-				"Mariners": "Safeco Field",
-				"Twins": "Target Field",
-				"Rays": "Tropicana Field",
-				"Yankees": "Yankee Stadium",
-				"Giants": "AT&T Park",
-				"Cardinals": "Busch Stadium",
-				"Diamondbacks": "Chase Field",
-				"Mets": "Citi Field",
-				"Phillies": "Citizens Bank Park",
-				"Rockies": "Coors Field",
-				"Dodgers": "Dodger Stadium",
-				"Reds": "Great American Ball Park",
-				"Marlins": "Marlins Park",
-				"Brewers": "Miller Park",
-				"Nationals": "Nationals Park",
-				"Padres": "Petco Park",
-				"Pirates": "PNC Park",
-				"Braves": "Turner Field",
-				"Cubs": "Wrigley Field"};
-
 d3.json("bbs-2016.json", function(jsonData) {
 
-	pointPlot = d3.select("#pointsSVG");
+	// svg dimensions
+	var w = 1050;           
+	var h = 1000;
+	var margin = 120;
+	var xVal = "x";
+	var yVal = "y";
+	var pointPlot = d3.select("#pointsSVG");
 
+	// the scale we used to transform x- and y- coordinates to plot coordinates
 	xScale = d3.scale.linear()
 				.domain([0,250])
 				.range([margin, w - margin]);
@@ -45,6 +16,7 @@ d3.json("bbs-2016.json", function(jsonData) {
 				.domain([0,235])
 				.range([h - margin, margin]);
 
+	// baseball diamond dimensions
 	var x_hp = 125;
 	var y_hp = 43;
 	var f_len = 150;
@@ -52,7 +24,7 @@ d3.json("bbs-2016.json", function(jsonData) {
 	var y_max = 250;
 	var f_angl = Math.sqrt(2)/2;
 
-	// draw the foul lines and basepaths
+	// draw the foul lines
 	var leftFoul = pointPlot.append("line")
 		.attr("x1", function(d) { return xScale(x_hp); })
 		.attr("y1", function(d) { return yScale(y_hp); })
@@ -65,6 +37,7 @@ d3.json("bbs-2016.json", function(jsonData) {
 		.attr("x2", function(d) { return xScale(x_hp + f_angl * f_len); })
 		.attr("y2", function(d) { return yScale(y_hp + f_angl * f_len); });
 
+	// draw the basepaths
 	var firstToSecond = pointPlot.append("line")
 		.attr("x1", function(d) { return xScale(x_hp); })
 		.attr("y1", function(d) { return yScale(y_hp + Math.sqrt(2) * b_len); })
@@ -77,8 +50,10 @@ d3.json("bbs-2016.json", function(jsonData) {
 		.attr("x2", function(d) { return xScale(x_hp); })
 		.attr("y2", function(d) { return yScale(y_hp + Math.sqrt(2) * b_len); });
 
+	// initialize batter/pitcher/color scheme
 	var batterSelection = "";
 	var pitcherSelection = "ALL_PITCHERS";
+	var binary_color = false;
 	
 	function updatePoints() {
 		var ballpark = $("#ballparks").val();
@@ -117,7 +92,24 @@ d3.json("bbs-2016.json", function(jsonData) {
 				pitcherFilter = function(d) { return d["pitcher_name"] == pitcher; }
 		}
 
+		// change legend if binary color scheme chosen
+		if (binary_color) {
+			$("#color-list").html(`
+				<li style="color:#377eb8;"><label>Hits</label></li>
+				<li style="color:#e41a1c;"><label>Outs</label></li>`);
+		}
+		else {
+			$("#color-list").html(`
+				<li style="color:#ff7f00;"><label>Home Runs</label></li>
+				<li style="color:#252525;"><label>Triples</label></li>
+				<li style="color:#377e35;"><label>Doubles</label></li>
+				<li style="color:#377eb8;"><label>Singles</label></li>
+				<li style="color:#e41a1c;"><label>Outs</label></li>`);
+		}
+
 		var hitResults = $("#hit-results").val();
+		
+		// subset json data if not all stadiums are selected
 		var data = [];
 		if (ballpark == "") {
 			for (park in jsonData) {
@@ -129,61 +121,67 @@ d3.json("bbs-2016.json", function(jsonData) {
 			data = jsonData[ballpark];
 		}
 
+		// remove previous plot before making new one
 		pointPlot.selectAll("circle").remove();
+
+		// if no hit results are selected, alert user
+		if (!hitResults && !binary_color) {
+			alert("No results!");
+			return;
+		}
 
 		var circle = pointPlot.selectAll("circle")
 				.data(data);
 			circle.enter()
 				.append("svg:circle");
 		
+		// filter json by selected filters
 		var filteredSelection = circle.filter(function(d) {
 			var p = pitcherFilter(d);
 			var b = batterFilter(d);
 			var j = d["type"] != "E" && !(d["x"] <= 1 && d["y"] <= 1);
-			var correctHit = hitResults.includes(d["des"].toLowerCase()) || (hitResults.includes("out") && d["type"] == "O");
+			var correctHit = binary_color || (hitResults.includes(d["des"].toLowerCase()) || (hitResults.includes("out") && d["type"] == "O"));
 			return correctHit && p && b && j;
 		});
 
-		console.log(filteredSelection[0].length);
-
 		// helper function for varying opacity given number of points
 		function getOpacity(numPoints) {
-			if (numPoints > 100000) { return "0.3"; }
-			else if (numPoints > 60000) { return "0.4" }
+			if (numPoints > 60000) { return "0.3"; }
 			else if (numPoints > 4000) { return "0.6"; }
 			else { return "1"; }
 		}
 
+		// helper functions for color schemes
+		function multipleColorScheme(hitDesc) {
+			if (hitDesc == "Single") { return "#1f78b4"; }
+			else if (hitDesc == "Double") { return "#377e35"; }
+			else if (hitDesc == "Triple") { return "#000000"; }
+			else if (hitDesc == "Home Run") { return "#ff7f00"; }
+		}
+		function binaryColorScheme(hitDesc) {
+			return "1f78b4";
+		}
+
 		var pointRadius = (filteredSelection[0].length > 4000) ? "2" : "3";
 		var pointOpacity = getOpacity(filteredSelection[0].length);
+		var colorScheme = (binary_color) ? binaryColorScheme : multipleColorScheme;
 
 		filteredSelection
 			.attr("cx", function(d) { return xScale(d["x"]); })
 			.attr("cy", function(d) { return yScale(250-d["y"]); })
 			.style("fill", function(d) {
-				if (d["type"] == "O") {
-					return "#e41a1c";
-				}
-				if (d["des"] == "Single") {
-					return "#1f78b4";
-				}
-				else if (d["des"] == "Double") {
-					return "#984ea3";
-				}
-				else if (d["des"] == "Triple") {
-					return "#252525";
-				}
-				else if (d["des"] == "Home Run") {
-					return "#ff7f00";
-				}
-				else {
-					return "black";
+				switch (d["type"]) {
+					case "O":
+						return "#e41a1c";
+						break;
+					case "H":
+						return colorScheme(d["des"]);
+						break;
 				}
 			})
 			.attr("r", pointRadius)
 			.style("opacity", pointOpacity)
 			.on("mouseover", function(d) {
-				console.log(d);
 				d3.select(this).style("stroke", "white")
 								.style("stroke-width", "2px")
 								.attr("r", "6");
@@ -248,7 +246,7 @@ d3.json("bbs-2016.json", function(jsonData) {
 
 		// get list of stadiums and their home teams
 		var bps = [];
-		for (team in teamParks) {
+		for (team in jsonData) {
 			bps.push(team);
 		}
 
@@ -270,6 +268,12 @@ d3.json("bbs-2016.json", function(jsonData) {
 						pitcherSelection = "";
 						var group = "input:checkbox[name='pitchers']";	
 						$(group).prop("checked", false);
+					});
+
+		$("#hit-results").on("change", function() {
+						var group = "input:checkbox[name='hit-results']";	
+						$(group).prop("checked", false);
+						binary_color = false;
 					});
 
 		$("input:checkbox").on('click', function() {
@@ -304,10 +308,38 @@ d3.json("bbs-2016.json", function(jsonData) {
 						break;
 					case "allpitchers":
 						pitcherSelection = "ALL_PITCHERS";
+						break;
+					case "binary_color":
+						binary_color = true;
+						break;
 				}
 			}
 			else {
 				$box.prop("checked", false);
+
+				switch ($box.attr("id")) {
+					case "rightybatters":
+						batterSelection = "";
+						break;
+					case "leftybatters":
+						batterSelection = "";
+						break;
+					case "allbatters":
+						batterSelection = "";
+						break;
+					case "rightypitchers":
+						pitcherSelection = "";
+						break;
+					case "leftypitchers":
+						pitcherSelection = "";
+						break;
+					case "allpitchers":
+						pitcherSelection = "";
+						break;
+					case "binary_color":
+						binary_color = false;
+						break;
+				}
 			}
 		});
 
@@ -316,6 +348,7 @@ d3.json("bbs-2016.json", function(jsonData) {
 		});
 	});
 
+	// initialize text and checkbox fields
 	$("#allballparks").prop("checked", true);
 	$("#allpitchers").prop("checked", true);
 	$("#ballparks").val("");
