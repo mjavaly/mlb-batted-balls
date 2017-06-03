@@ -76,33 +76,58 @@ d3.json("bbs-2016.json", function(jsonData) {
 		.attr("y1", function(d) { return yScale(y_hp + f_angl * b_len); })
 		.attr("x2", function(d) { return xScale(x_hp); })
 		.attr("y2", function(d) { return yScale(y_hp + Math.sqrt(2) * b_len); });
+
+	var batterSelection = "";
+	var pitcherSelection = "ALL_PITCHERS";
 	
 	function updatePoints() {
 		var ballpark = $("#ballparks").val();
-		var batter = $("#batters").val();
-		var pitcher = $("#pitchers").val();
+
+		// handle batter filters given button/form input
+		var batter = (batterSelection) ? batterSelection : $("#batters").val();
+		var batterFilter = function(d) { return; }
+		switch (batter) {
+			case "RIGHTY_BATTERS":
+				batterFilter = function(d) { return d["batter_bats"] == "R"; }
+				break;
+			case "LEFTY_BATTERS":
+				batterFilter = function(d) { return d["batter_bats"] == "L"; }
+				break;
+			case "ALL_BATTERS":
+				batterFilter = function(d) { return true; }
+				break;
+			default:
+				batterFilter = function(d) { return d["batter_name"] == batter; }
+		}
+
+		// handle pitcher filters given button/form input
+		var pitcher = (pitcherSelection) ? pitcherSelection : $("#pitchers").val();
+		var pitcherFilter = function(d) { return; }
+		switch (pitcher) {
+			case "RIGHTY_PITCHERS":
+				pitcherFilter = function(d) { return d["pitcher_throws"] == "R"; }
+				break;
+			case "SOUTHPAWS":
+				pitcherFilter = function(d) { return d["pitcher_throws"] == "L"; }
+				break;
+			case "ALL_PITCHERS":
+				pitcherFilter = function(d) { return true; }
+				break;
+			default:
+				pitcherFilter = function(d) { return d["pitcher_name"] == pitcher; }
+		}
+
 		var hitResults = $("#hit-results").val();
 		var data = [];
 		if (ballpark == "") {
 			for (park in jsonData) {
+				// this merges two arrays without creating a new one
 				Array.prototype.push.apply(data, jsonData[park]);
 			}
 		}
 		else {
 			data = jsonData[ballpark];
 		}
-
-		var batterFilter = 0;
-		if ($("#batters")) { batterFilter = 1; }
-		else if ($("#rightybatters").is(":checked")) { batterFilter = 2; }
-		else if ($("#leftybatters").is(":checked")) { batterFilter = 3; }
-
-		console.log(batterFilter);
-
-		var pitcherFilter = 0;
-		if ($("#pitchers")) { pitcherFilter = 1; }
-		else if ($("#rightypitchers").is(":checked")) { pitcherFilter = 2; }
-		else if ($("#leftypitchers").is(":checked")) { pitcherFilter = 3; }
 
 		pointPlot.selectAll("circle").remove();
 
@@ -111,110 +136,104 @@ d3.json("bbs-2016.json", function(jsonData) {
 			circle.enter()
 				.append("svg:circle");
 		
-			var filteredSelection = circle.filter(function(d) {
-				var p = (pitcher == "") ? true : d["pitcher_name"] == pitcher;
-				// var b = 
-				// var b = (function() {
-				// 	if ($("#rightybatters").is(":checked")) {
-				// 		return d["batter_bats"] == "R";
-				// 	}
-				// 	else if ($("#leftybatters").is(":checked")) {
-				// 		return d["batter_bats"] == "L";
-				// 	}
-				// 	else if ($("#allbatters").is(":checked")) {
-				// 		return true;
-				// 	}
-				// 	else { return d["batter_name"] == batter; }
-				// });
-				// var b = $("#rightybatters").is(":checked") ? d["batter_bats"] == "R" : ((batter == "") ? true : d["batter_name"] == batter);
-				var b = d["batter_name"] == batter;
-				var j = d["type"] != "E" && !(d["x"] <= 1 && d["y"] <= 1);
-				var correctHit = hitResults.includes(d["des"].toLowerCase()) || (hitResults.includes("out") && d["type"] == "O");
-				return correctHit && p && b && j;
+		var filteredSelection = circle.filter(function(d) {
+			var p = pitcherFilter(d);
+			var b = batterFilter(d);
+			var j = d["type"] != "E" && !(d["x"] <= 1 && d["y"] <= 1);
+			var correctHit = hitResults.includes(d["des"].toLowerCase()) || (hitResults.includes("out") && d["type"] == "O");
+			return correctHit && p && b && j;
+		});
+
+		console.log(filteredSelection[0].length);
+
+		// helper function for varying opacity given number of points
+		function getOpacity(numPoints) {
+			if (numPoints > 100000) { return "0.3"; }
+			else if (numPoints > 60000) { return "0.4" }
+			else if (numPoints > 4000) { return "0.6"; }
+			else { return "1"; }
+		}
+
+		var pointRadius = (filteredSelection[0].length > 4000) ? "2" : "3";
+		var pointOpacity = getOpacity(filteredSelection[0].length);
+
+		filteredSelection
+			.attr("cx", function(d) { return xScale(d["x"]); })
+			.attr("cy", function(d) { return yScale(250-d["y"]); })
+			.style("fill", function(d) {
+				if (d["type"] == "O") {
+					return "#e41a1c";
+				}
+				if (d["des"] == "Single") {
+					return "#377eb8";
+				}
+				else if (d["des"] == "Double") {
+					return "#984ea3";
+				}
+				else if (d["des"] == "Triple") {
+					return "#252525";
+				}
+				else if (d["des"] == "Home Run") {
+					return "#ff7f00";
+				}
+				else {
+					return "black";
+				}
+			})
+			.attr("r", pointRadius)
+			.style("opacity", pointOpacity)
+			.on("mouseover", function(d) {
+				console.log(d);
+				d3.select(this).style("stroke", "white")
+								.style("stroke-width", "2px")
+								.attr("r", "6");
+			})
+			.on("mouseout", function(d) {
+				d3.select(this).style("stroke", "none")
+								.attr("r", pointRadius);
+			})
+			// tooltip for each point
+			.append("svg:title")
+			.text(function(d) {
+				return d["batter_name"] + " (" + d["batter_bats"] + ") " + 
+						getVerb(d["des"]) + ((d["type"] == "O") ? "against " : "off ") +
+						d["pitcher_name"] + " (" + d["pitcher_throws"] + ").";
 			});
-		
-			// console.log(filteredSelection[0].length);
-			
-			filteredSelection.attr("cx", function(d) { return xScale(d["x"]); })
-				.attr("cy", function(d) { return yScale(250-d["y"]); })
-				.style("fill", function(d) {
-					if (d["type"] == "O") {
-						return "#e41a1c";
-					}
-					if (d["des"] == "Single") {
-						return "#377eb8";
-					}
-					else if (d["des"] == "Double") {
-						return "#984ea3";
-					}
-					else if (d["des"] == "Triple") {
-						return "#252525";
-					}
-					else if (d["des"] == "Home Run") {
-						return "#ff7f00";
-					}
-					else {
-						return "black";
-					}
-				})
-				.attr("r", getRadius(filteredSelection[0]))
-				.style("opacity", function() {
-					if (filteredSelection[0].length > 100000) { return "0.3"; }
-					else if (filteredSelection[0].length > 4000) { return "0.6"; }
-					else { return "1"; }
-				})
-				.on("mouseover", function(d) {
-					console.log(d);
-					d3.select(this).style("stroke", "white")
-									.style("stroke-width", "2px")
-									.attr("r", "6");
-				})
-				.on("mouseout", function(d) {
-					d3.select(this).style("stroke", "none")
-									.attr("r", getRadius(filteredSelection[0]));
-				})
-				.append("svg:title")
-				.text(function(d) {
-					return d["batter_name"] + getVerb(d["des"]) + ((d["type"] == "O") ? "against " : "off ") + d["pitcher_name"] + ".";
-				});
 	}
 
-	function getRadius(numPoints) {
-		if (numPoints.length > 4000) { return "2"; }
-		else { return "3"; }
-	}
-
+	// helper function for creating tooltip text
 	function getVerb(description) {
 		switch (description) {
 			case "Home Run":
-				return " homered ";
+				return "homered ";
 				break;
 			case "Groundout":
-				return " grounded out ";
+				return "grounded out ";
 				break;
 			case "Bunt Groundout":
-				return " bunted out ";
+				return "bunted out ";
 				break;
 
 			case "Flyout":
-				return " flied out ";
+				return "flied out ";
 				break;
 
 			case "Pop Out":
-				return " popped out ";
+				return "popped out ";
 				break;
 
 			case "Lineout":
-				return " lined out ";
+				return "lined out ";
 				break
 
 			default:
 				// a rare case of the English language making it easy to format strings
-				return " " + description.toLowerCase() + "d ";
+				return description.toLowerCase() + "d ";
 				break;
 		}
 	}
 	
+	// this block for initializing button/form input logic
 	$(function() {
 		// use Sets for batters and pitchers to prevent duplicates
 		var batters = new Set();
@@ -237,38 +256,59 @@ d3.json("bbs-2016.json", function(jsonData) {
 			bps.push(team);
 		}
 
+		// create logic for autocomplete fields
+		// includes unchecking of all relevant checkboxes
 		$("#ballparks").autocomplete({ source: bps })
 					.on("autocompletechange", function() {
-						curTeam = this.value;
-						console.log(curTeam);
+						var group = "input:checkbox[name='ballparks']";	
+						$(group).prop("checked", false);
 					});
 		$("#batters").autocomplete({ source: batterList })
 					.on("autocompletechange", function() {
-						curBatter = this.value;
-						var $box = $("input:checkbox");
-						var group = "input:checkbox[name='batter']";	
+						batterSelection = "";
+						var group = "input:checkbox[name='batters']";	
 						$(group).prop("checked", false);
-						console.log(curBatter);
 					});
 		$("#pitchers").autocomplete({ source: pitcherList })
 					.on("autocompletechange", function() {
-						curPitcher = this.value;
-						var $box = $("input:checkbox");
-						var group = "input:checkbox[name='pitcher']";	
+						pitcherSelection = "";
+						var group = "input:checkbox[name='pitchers']";	
 						$(group).prop("checked", false);
-						console.log(curPitcher);
 					});
 
-		// this just makes our checkboxes behave like radio buttons
-		// so they allow for 1 or 0 selections
 		$("input:checkbox").on('click', function() {
 			var $box = $(this);
-			// somewhat janky way of erasing text fields when box gets checked
-			$("#" + $box.attr("name") + "s").val("");
+
+			// somewhat janky way of erasing text fields when corresponding box gets checked
+			$("#" + $box.attr("name")).val("");
+
+			// this just makes our checkboxes behave like radio buttons
+			// so they allow for 1 or 0 selections
 			if ($box.is(":checked")) {
-				var group = "input:checkbox[name='" + $box.attr("name") + "']";	
+				var group = "input:checkbox[name='" + $box.attr("name") + "']";
 				$(group).prop("checked", false);
 				$box.prop("checked", true);
+
+				// do some background logic for filtering later
+				switch ($box.attr("id")) {
+					case "rightybatters":
+						batterSelection = "RIGHTY_BATTERS";
+						break;
+					case "leftybatters":
+						batterSelection = "LEFTY_BATTERS";
+						break;
+					case "allbatters":
+						batterSelection = "ALL_BATTERS";
+						break;
+					case "rightypitchers":
+						pitcherSelection = "RIGHTY_PITCHERS";
+						break;
+					case "leftypitchers":
+						pitcherSelection = "SOUTHPAWS";
+						break;
+					case "allpitchers":
+						pitcherSelection = "ALL_PITCHERS";
+				}
 			}
 			else {
 				$box.prop("checked", false);
@@ -280,6 +320,8 @@ d3.json("bbs-2016.json", function(jsonData) {
 		});
 	});
 
+	$("#allballparks").prop("checked", true);
+	$("#allpitchers").prop("checked", true);
 	$("#ballparks").val("");
 	$("#batters").val("Mike Trout");
 	$("#pitchers").val("");
